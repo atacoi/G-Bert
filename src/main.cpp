@@ -59,7 +59,7 @@ int main() {
 
     game.initializeVAO();
 
-    GameObject g(&s);
+    GameObject g(&s, glm::vec2(1.0f, 1.0f), 100, 100);
 
     game.addGameObject(&g);
 

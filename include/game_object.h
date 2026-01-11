@@ -35,8 +35,9 @@ class GameObject {
         /*                  Utility                       */
         /* ********************************************** */
     
-        void render(int screenWidth, int screenHeight) const;
+        virtual void render(int screenWidth, int screenHeight);
         void translate(glm::vec2 position);
+        void rotate(float degree); // in degrees
 
     private:
         Shader *shader;
