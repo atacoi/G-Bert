@@ -45,6 +45,9 @@ void GameObject::render(int screenWidth, int screenHeight) {
 
     shader->use();
 
+    float color[] = {1.0f, 0.0f, 0.0f};
+    glUniform3fv(glGetUniformLocation(shader->getProgramID(), "color"), 1, color);
+
     glm::mat4 model = glm::mat4(1.0f);
             glm::mat4 shear = glm::mat4(1.0f);
     // shear[0][1] = -0.5f;
@@ -56,7 +59,6 @@ void GameObject::render(int screenWidth, int screenHeight) {
             shear[1][1] = -0.5f;
 
             shear[0][1] = -0.5f;
-    model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
     model = model * shear;
     model = glm::scale(model, glm::vec3(width, height, 1.0f));
 
@@ -71,13 +73,11 @@ void GameObject::render(int screenWidth, int screenHeight) {
     -1.0f,
     1.0f
 );
-    glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered
-
-
 glUniformMatrix4fv(
     glGetUniformLocation(shader->getProgramID(), "projection"),
     1, GL_FALSE, glm::value_ptr(projection)
 );
+    glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered
 
 //     glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered 
 
@@ -114,6 +114,28 @@ glUniformMatrix4fv(
     model = glm::scale(model, glm::vec3(width, height, 1.0f));
 
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+    glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(200.0f, 200.0f, 0.0f));
+    //model = glm::translate(model, glm::vec3(-0.5f*width, 1.0f*height, 0.0f));
+    //model = glm::translate(model, glm::vec3(0.0f, -height/4, 0.0f));
+    shear = glm::mat4(1.0f);
+    float len = sqrtf(5) / 2.0f;
+                shear[1][0] = -1.0f;
+            shear[1][1] = -0.5f;
+
+            shear[0][1] = -0.5f;
+    float t = sqrt(height * height / 4 + width * width);
+    model = glm::translate(model, glm::vec3(0.0f, height, 0.0f));
+    model = glm::translate(model, glm::vec3(-t / len, 0.5f * t / len, 0.0f));
+    model = model * shear;
+    model = glm::scale(model, glm::vec3(width, height, 1.0f));
+
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+    color[1] = 1.0f;
+    glUniform3fv(glGetUniformLocation(shader->getProgramID(), "color"), 1, color);
 
     glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered
 }
