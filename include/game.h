@@ -1,10 +1,29 @@
 #pragma once
 
+#include "game_object.h"
+
+#include <glad/glad.h>
+#include <map>
+#include <GLFW/glfw3.h>
+
 enum GAME_STATES {
     ACTIVE,
     TERMINATED,
     len
 };
+
+extern GLuint STATIC_IDs;
+
+static const float QUAD[] = {
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 
+    0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+};
+
+const GLint VERTEX_SIZE = 3;
 
 class Game {
     public:
@@ -13,7 +32,7 @@ class Game {
         /* ********************************************** */
 
         Game();
-        Game(int width, int height, char *title);
+        Game(int width, int height, const std::string &);
 
         /* ********************************************** */
         /*                DESTRUCTORS                     */
@@ -27,7 +46,7 @@ class Game {
 
         int getScreenWidth();
         int getScreenHeight();
-        char *getTitle();
+        std::string &getTitle();
         GAME_STATES getCurrState();
 
         /* ********************************************** */
@@ -36,7 +55,6 @@ class Game {
 
         void setScreenWidth(int width);
         void setScreenHeight(int height);
-        void setTitle(char *title);
         void setCurrState(GAME_STATES state);
 
         /* ********************************************** */
@@ -44,10 +62,18 @@ class Game {
         /* ********************************************** */
 
         bool isRunning();
+        void render(GLFWwindow *window);
+
+        void initializeVAO();
+
+        void addGameObject(GameObject *go);
 
     private:
         int screenWidth;
         int screenHeight;
-        char *screenTitle;
+        std::string screenTitle;
         GAME_STATES currState;
+        std::map<GLuint, GameObject*> gameObjectMap;
+        GLuint QUAD_VAO;
+
 };

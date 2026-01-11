@@ -3,7 +3,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "game.h"
+#include "shader.h"
+#include "resource_manager.h"
+#include "game_object.h"
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height); 
 void windowCloseCallback(GLFWwindow *window);
@@ -23,7 +30,7 @@ int main() {
 
     GLFWwindow *window = glfwCreateWindow(game.getScreenWidth(), 
                                           game.getScreenHeight(), 
-                                          game.getTitle(), 
+                                          game.getTitle().c_str(), 
                                           NULL, 
                                           NULL);
 
@@ -41,14 +48,24 @@ int main() {
         return -1;
     }
 
+    glViewport(0, 0, game.getScreenWidth(), game.getScreenHeight());
+
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
 
-    glClearColor(0.0f, 0.22f, 0.55f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
+    //ResourceManager::createShader("sprite.vertex", "sprite.fragment", "default");
+
+    Shader s("sprite.vertex", "sprite.fragment");
+
+    game.initializeVAO();
+
+    GameObject g(&s);
+
+    game.addGameObject(&g);
 
     while(!glfwWindowShouldClose(window)) {
+        game.render(window);
+
         glfwPollEvents();
     }
 

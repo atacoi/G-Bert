@@ -3,24 +3,25 @@
 #include "game.h"
 #include <stdlib.h>
 
+GLuint STATIC_IDs = 0;
+
+/* ********************************************** */
+/*                PUBLIC                          */
+/* ********************************************** */
+
 /* ********************************************** */
 /*                CONSTRUCTORS                    */
 /* ********************************************** */
 
-Game::Game() {
+Game::Game(): screenTitle("G-Bert"), gameObjectMap() {
     screenWidth = 1280;
     screenHeight = 720;
-    char buffer[] = {'G', '-', 'B', 'e', 'r', 't', '\0'};
-    screenTitle = NULL;
-    this->setTitle(buffer);
     currState = GAME_STATES::ACTIVE;
 }
 
-Game::Game(int width, int height, char *title) {
+Game::Game(int width, int height, const std::string &title): screenTitle(title), gameObjectMap()  {
     screenWidth = width;
     screenHeight = height;
-    screenTitle = NULL;
-    this->setTitle(title);
     currState = GAME_STATES::ACTIVE;
 }
 
@@ -29,8 +30,8 @@ Game::Game(int width, int height, char *title) {
 /* ********************************************** */
 
 Game::~Game() {
-    free(screenTitle);
     currState = GAME_STATES::TERMINATED;
+    glDeleteVertexArrays(1, &QUAD_VAO);
 }
 
 /* ********************************************** */
@@ -41,7 +42,7 @@ int Game::getScreenWidth() { return screenWidth; }
 
 int Game::getScreenHeight() { return screenHeight; }
 
-char *Game::getTitle() { return screenTitle; }
+std::string &Game::getTitle() { return screenTitle; }
 
 GAME_STATES Game::getCurrState() { return currState; }
 
@@ -65,12 +66,6 @@ void Game::setScreenHeight(int height) {
     }
 }
 
-void Game::setTitle(char *title) {
-    free(screenTitle); // ok since constructor sets to NULL pointer initially 
-    screenTitle = (char*)malloc(strlen(title) + 1);
-    strcpy(screenTitle, title);
-}
-
 void Game::setCurrState(GAME_STATES state) { currState = state; }
 
 /* ********************************************** */
@@ -78,3 +73,41 @@ void Game::setCurrState(GAME_STATES state) { currState = state; }
 /* ********************************************** */
 
 bool Game::isRunning() { return this->currState == GAME_STATES::ACTIVE; }
+
+void Game::render(GLFWwindow *window) {
+    glClearColor(0.0f, 0.22f, 0.55f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindVertexArray(QUAD_VAO);
+
+    std::map<GLuint, GameObject*>::iterator it;
+
+    for (auto &gameObject : gameObjectMap) {
+        gameObject.second->render(screenWidth, screenHeight);
+    }
+
+    glfwSwapBuffers(window);
+}
+
+void Game::initializeVAO() {
+    GLuint VBO;
+
+    glGenVertexArrays(1, &QUAD_VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(QUAD_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QUAD), QUAD, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, VERTEX_SIZE, GL_FLOAT, GL_FALSE, VERTEX_SIZE * sizeof(GL_FLOAT), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //glDeleteBuffers(1, &VBO);
+}
+
+void Game::addGameObject(GameObject *go) {
+    gameObjectMap[go->getID()] = go;
+}
