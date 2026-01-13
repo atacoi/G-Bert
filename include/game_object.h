@@ -30,13 +30,23 @@ class GameObject {
         /* ********************************************** */
 
         GLuint getID() const;
+        Shader *getShader() const;
+        glm::vec2 getPosition() const;
+        GLint getWidth() const;
+        GLint getHeight() const;
+
+        /* ********************************************** */
+        /*                  SETTERS                       */
+        /* ********************************************** */
+
+        void setPosition(glm::vec2 position);
 
         /* ********************************************** */
         /*                  Utility                       */
         /* ********************************************** */
     
         virtual void render(int screenWidth, int screenHeight);
-        void translate(glm::vec2 position);
+        virtual void translate(glm::vec2 position);
         void rotate(float degree); // in degrees
 
     private:

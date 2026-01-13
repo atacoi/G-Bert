@@ -10,7 +10,8 @@
 #include "game.h"
 #include "shader.h"
 #include "resource_manager.h"
-#include "game_object.h"
+#include "cube.h"
+#include "board.h"
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height); 
 void windowCloseCallback(GLFWwindow *window);
@@ -59,12 +60,24 @@ int main() {
 
     game.initializeVAO();
 
-    GameObject g(&s, glm::vec2(1.0f, 1.0f), 100, 100);
+    // Cube g(&s);
 
-    game.addGameObject(&g);
+    // game.addGameObject(&g);
+
+    Board board(&s, 7, glm::vec2(game.getScreenWidth() / 2.0f, 200.0f));
+
+    board.addGameObjectsToBoard(&game);
+
+    double prevTime = glfwGetTime();
+    double delta = 1.0;
 
     while(!glfwWindowShouldClose(window)) {
         game.render(window);
+
+        // if(glfwGetTime() - prevTime >= delta) {
+        //     g.step();
+        //     prevTime = glfwGetTime();
+        // }
 
         glfwPollEvents();
     }
