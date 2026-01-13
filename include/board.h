@@ -20,7 +20,7 @@ class Board {
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        void addGameObjectsToBoard(Game *game);
+        void addGameObjectsToGame(Game *game);
 
     private:
         std::vector<std::vector<GameObject*>> board; 

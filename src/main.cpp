@@ -66,7 +66,7 @@ int main() {
 
     Board board(&s, 7, glm::vec2(game.getScreenWidth() / 2.0f, 200.0f));
 
-    board.addGameObjectsToBoard(&game);
+    board.addGameObjectsToGame(&game);
 
     double prevTime = glfwGetTime();
     double delta = 1.0;

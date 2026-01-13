@@ -46,7 +46,7 @@ Board::Board(Shader *shader, GLint levels, glm::vec2 startingPosition): board() 
 /*                  UTILITY                       */
 /* ********************************************** */
 
-void Board::addGameObjectsToBoard(Game *game) {
+void Board::addGameObjectsToGame(Game *game) {
     for(int i = 0; i < board.size(); i++) {
         for(int j = 0; j < board[i].size(); j++) {
             game->addGameObject(board[i][j]);
