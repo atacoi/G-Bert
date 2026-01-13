@@ -12,6 +12,8 @@
 #include "resource_manager.h"
 #include "cube.h"
 #include "board.h"
+#include "g_bert.h"
+#include "texture2d.h"
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height); 
 void windowCloseCallback(GLFWwindow *window);
@@ -54,9 +56,10 @@ int main() {
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
 
-    //ResourceManager::createShader("sprite.vertex", "sprite.fragment", "default");
+    Shader _default("default.vertex", "default.fragment");
 
-    Shader s("sprite.vertex", "sprite.fragment");
+    Shader _sprite("sprite.vertex", "sprite.fragment");
+    Texture2D _tex2D("G-Bert.png");
 
     game.initializeVAO();
 
@@ -64,20 +67,42 @@ int main() {
 
     // game.addGameObject(&g);
 
-    Board board(&s, 7, glm::vec2(game.getScreenWidth() / 2.0f, 200.0f));
+    Board board(&_default, 7, glm::vec2(game.getScreenWidth() / 2.0f, 200.0f));
+
+    GBert gbert(&_sprite, &_tex2D, 65, 65);
 
     board.addGameObjectsToGame(&game);
+    game.addGameObject(&gbert);
 
     double prevTime = glfwGetTime();
     double delta = 1.0;
 
+    int direction = 1; // down    
+    GameObject *curr = board.getGameObject(0);
+    Cube *cube = dynamic_cast<Cube*>(curr);
+    gbert.setPosition(cube->getTopCenter() - glm::vec2(gbert.getWidth() * 0.5f, gbert.getHeight()));
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     while(!glfwWindowShouldClose(window)) {
         game.render(window);
 
-        // if(glfwGetTime() - prevTime >= delta) {
-        //     g.step();
-        //     prevTime = glfwGetTime();
-        // }
+        if(glfwGetTime() - prevTime >= delta) {
+            GameObject *nxt = direction == 1 ? board.getChildGameObject(curr, TREE_DIRECTION_TYPE::LEFT) 
+                                             : board.getParentGameObject(curr, TREE_DIRECTION_TYPE::RIGHT);
+            if(nxt) {
+                Cube *cube = nullptr;
+                if((cube = dynamic_cast<Cube*>(nxt))) {
+                    gbert.setPosition(cube->getTopCenter() - glm::vec2(gbert.getWidth() * 0.5f, gbert.getHeight()));
+                    cube->step();
+                }
+                curr = nxt;
+                prevTime = glfwGetTime();
+            } else {
+                direction *= -1;
+            }
+        }
 
         glfwPollEvents();
     }

@@ -151,8 +151,9 @@ void Cube::render(int screenWidth, int screenHeight) {
 }
 
 void Cube::step() { 
-    if(currentCount >= completionCount) return;
-    currentCount += 1; 
+    // if(currentCount >= completionCount) return;
+    //currentCount += 1; 
+    currentCount = (currentCount + 1) % topColors.size();
 }
 
 glm::vec2 Cube::getTopCenter() {

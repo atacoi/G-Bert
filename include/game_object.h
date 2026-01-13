@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shader.h"
+#include "texture2d.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,6 +18,7 @@ class GameObject {
 
         GameObject();
         GameObject(Shader *shader);
+        GameObject(Shader *shader, Texture2D *texture, GLint width, GLint height);
         GameObject(Shader *shader, glm::vec2 position, GLint width, GLint height);
 
         /* ********************************************** */
@@ -51,6 +53,7 @@ class GameObject {
 
     private:
         Shader *shader;
+        Texture2D *texture;
         glm::vec2 position; 
         GLfloat rotationAngle;
         GLint width; 

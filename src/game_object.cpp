@@ -9,6 +9,7 @@
 
 GameObject::GameObject() {
     shader = nullptr;
+    texture = nullptr;
     position = glm::vec2(1.0f);
     width = 100;
     height = 100;
@@ -17,6 +18,23 @@ GameObject::GameObject() {
 }
 
 GameObject::GameObject(Shader *shader): shader(shader), position(glm::vec2(100.0f, 100.0f)), width(100), height(100), rotationAngle(0) {
+    texture = nullptr;
+    modelUniformLocation = glGetUniformLocation(shader->getProgramID(), "model");
+    ID = STATIC_IDs++;
+    shader->use();
+    glm::mat4 projection = glm::ortho(
+                                        0.0f,
+                                        (float)width,
+                                        (float)height,
+                                        0.0f,
+                                        -1.0f,
+                                        1.0f
+                                     );
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "projection"), 1,  GL_FALSE, glm::value_ptr(projection));
+
+}
+
+GameObject::GameObject(Shader *shader, Texture2D *texture, GLint width, GLint height): shader(shader), texture(texture), position(glm::vec2(100.0f, 100.0f)), width(width), height(height), rotationAngle(0) {
     modelUniformLocation = glGetUniformLocation(shader->getProgramID(), "model");
     ID = STATIC_IDs++;
     shader->use();
@@ -33,6 +51,7 @@ GameObject::GameObject(Shader *shader): shader(shader), position(glm::vec2(100.0
 }
 
 GameObject::GameObject(Shader *shader, glm::vec2 position, GLint width, GLint height): shader(shader), position(position), width(width), height(height), rotationAngle(0) {
+    texture = nullptr;
     modelUniformLocation = glGetUniformLocation(shader->getProgramID(), "model");
     ID = STATIC_IDs++;
     shader->use();
@@ -80,6 +99,10 @@ void GameObject::setPosition(glm::vec2 position) {
 /* ********************************************** */
 
 void GameObject::render(int screenWidth, int screenHeight) {
+    if(!texture) {
+        texture->use();
+    }
+
     if(!shader) {
         std::cerr << "Shader is not defined for game object with ID" << ID << std::endl;
         return;

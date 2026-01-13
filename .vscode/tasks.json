@@ -19,6 +19,7 @@
         "-L${workspaceFolder}/dependencies/library/",
         "${workspaceFolder}/src/*.cpp",
         "${workspaceFolder}/dependencies/*.c",
+        "${workspaceFolder}/dependencies/*.cpp",
         "${workspaceFolder}/dependencies/library/libglfw.3.4.dylib",
         "-o",
         "${workspaceFolder}/build/${config:executable_name}",
