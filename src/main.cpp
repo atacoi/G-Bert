@@ -59,7 +59,7 @@ int main() {
     Shader _default("default.vertex", "default.fragment");
 
     Shader _sprite("sprite.vertex", "sprite.fragment");
-    Texture2D _tex2D("G-Bert.png");
+    Texture2D _tex2D("q_bert.png");
 
     game.initializeVAO();
 
@@ -69,7 +69,7 @@ int main() {
 
     Board board(&_default, 7, glm::vec2(game.getScreenWidth() / 2.0f, 200.0f));
 
-    GBert gbert(&_sprite, &_tex2D, 65, 65);
+    GBert gbert(&_sprite, &_tex2D, 100, 100);
 
     board.addGameObjectsToGame(&game);
     game.addGameObject(&gbert);
@@ -84,6 +84,8 @@ int main() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDisable(GL_MULTISAMPLE);
 
     while(!glfwWindowShouldClose(window)) {
         game.render(window);
