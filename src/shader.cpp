@@ -1,11 +1,12 @@
 #include "shader.h"
 #include "game.h"
+#include "global_constants.h"
+
 #include <iostream>
-#include <string.h>
 #include <fstream>
 #include <sstream>
+
 #include <glad/glad.h>
-#include "global_constants.h"
 
 /* ********************************************** */
 /*                PUBLIC                          */
@@ -21,10 +22,10 @@ Shader::Shader(const std::string &vertexShaderFileName, const std::string &fragm
 
     bool failed(false);
 
-    GLuint vertexShaderID    = this->createShader(vertexSource,   GL_VERTEX_SHADER,   &failed);
+    unsigned int vertexShaderID    = this->createShader(vertexSource,   GL_VERTEX_SHADER,   &failed);
     if(failed) return;
 
-    GLuint fragmenetShaderID = this->createShader(fragmentSource, GL_FRAGMENT_SHADER, &failed);
+    unsigned int fragmenetShaderID = this->createShader(fragmentSource, GL_FRAGMENT_SHADER, &failed);
     if(failed) return;
 
     programID = this->createShaderProgram(vertexShaderID, fragmenetShaderID, &failed);
@@ -33,12 +34,6 @@ Shader::Shader(const std::string &vertexShaderFileName, const std::string &fragm
     glDeleteShader(vertexShaderID);
     glDeleteShader(fragmenetShaderID);
 }
-
-/* ********************************************** */
-/*                UTILITY                         */
-/* ********************************************** */
-
-void Shader::use() { glUseProgram(programID); }
 
 /* ********************************************** */
 /*                DESTRUCTORS                     */
@@ -53,6 +48,22 @@ Shader::~Shader() { glDeleteProgram(programID); }
 GLuint Shader::getProgramID() { return programID; }
 
 /* ********************************************** */
+/*                UTILITIES                       */
+/* ********************************************** */
+
+void Shader::use() { glUseProgram(programID); }
+
+void Shader::setUniformMatrix4f(glm::mat4 matrix, const std::string& uniformName) {
+    unsigned int uniformLocation = glGetUniformLocation(programID, uniformName.c_str());
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, value_ptr(matrix));
+}
+
+void Shader::setUniform3f(glm::vec3 vec, const std::string& uniformName) {
+    unsigned int uniformLocation = glGetUniformLocation(programID, uniformName.c_str());
+    glUniform3fv(uniformLocation, 1, value_ptr(vec));
+}
+
+/* ********************************************** */
 /*                PRIVATE                         */
 /* ********************************************** */
 
@@ -60,14 +71,14 @@ GLuint Shader::getProgramID() { return programID; }
 /*                UTILITY                         */
 /* ********************************************** */
 
-GLuint Shader::createShader(const std::string &shaderSource, GLenum type, bool *failed) {
+unsigned int Shader::createShader(const std::string &shaderSource, GLenum type, bool *failed) {
     const char *cstr = shaderSource.c_str();
 
-    GLuint shaderID = glCreateShader(type);
+    unsigned int shaderID = glCreateShader(type);
     glShaderSource(shaderID, 1, &cstr, NULL);
     glCompileShader(shaderID);
 
-    GLint success;
+    int success;
 
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
     if(!success) {
@@ -80,13 +91,13 @@ GLuint Shader::createShader(const std::string &shaderSource, GLenum type, bool *
     return shaderID;
 }
 
-GLuint Shader::createShaderProgram(GLuint vertexShaderID, GLuint fragmentShaderID, bool *failed) {
-    GLuint programID = glCreateProgram();
+unsigned int Shader::createShaderProgram(unsigned int vertexShaderID, unsigned int fragmentShaderID, bool *failed) {
+    unsigned int programID = glCreateProgram();
     glAttachShader(programID, vertexShaderID);
     glAttachShader(programID, fragmentShaderID);
     glLinkProgram(programID);
 
-    GLint success;
+    int success;
     glGetProgramiv(programID, GL_LINK_STATUS, &success);
     if(!success) {
         char infoLog[1028];

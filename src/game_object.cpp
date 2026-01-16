@@ -7,63 +7,18 @@
 /*                CONSTRUCTORS                    */
 /* ********************************************** */
 
-GameObject::GameObject() {
-    shader = nullptr;
-    texture = nullptr;
-    position = glm::vec2(1.0f);
-    width = 100;
-    height = 100;
-    rotationAngle = 0;
+GameObject::GameObject(glm::vec2 origin, 
+                       Shader *shader, 
+                       Texture2D *texture, 
+                       int width, 
+                       int height):
+                       origin(origin),
+                       shader(shader),
+                       texture(texture),
+                       width(width),
+                       height(height)
+{
     ID = STATIC_IDs++;
-}
-
-GameObject::GameObject(Shader *shader): shader(shader), position(glm::vec2(100.0f, 100.0f)), width(100), height(100), rotationAngle(0) {
-    texture = nullptr;
-    modelUniformLocation = glGetUniformLocation(shader->getProgramID(), "model");
-    ID = STATIC_IDs++;
-    shader->use();
-    glm::mat4 projection = glm::ortho(
-                                        0.0f,
-                                        (float)width,
-                                        (float)height,
-                                        0.0f,
-                                        -1.0f,
-                                        1.0f
-                                     );
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "projection"), 1,  GL_FALSE, glm::value_ptr(projection));
-
-}
-
-GameObject::GameObject(Shader *shader, Texture2D *texture, GLint width, GLint height): shader(shader), texture(texture), position(glm::vec2(100.0f, 100.0f)), width(width), height(height), rotationAngle(0) {
-    modelUniformLocation = glGetUniformLocation(shader->getProgramID(), "model");
-    ID = STATIC_IDs++;
-    shader->use();
-    glm::mat4 projection = glm::ortho(
-                                        0.0f,
-                                        (float)width,
-                                        (float)height,
-                                        0.0f,
-                                        -1.0f,
-                                        1.0f
-                                     );
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "projection"), 1,  GL_FALSE, glm::value_ptr(projection));
-
-}
-
-GameObject::GameObject(Shader *shader, glm::vec2 position, GLint width, GLint height): shader(shader), position(position), width(width), height(height), rotationAngle(0) {
-    texture = nullptr;
-    modelUniformLocation = glGetUniformLocation(shader->getProgramID(), "model");
-    ID = STATIC_IDs++;
-    shader->use();
-    glm::mat4 projection = glm::ortho(
-                                        0.0f,
-                                        (float)width,
-                                        (float)height,
-                                        0.0f,
-                                        -1.0f,
-                                        1.0f
-                                     );
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "projection"), 1,  GL_FALSE, glm::value_ptr(projection));
 }
 
 /* ********************************************** */
@@ -76,22 +31,46 @@ GameObject::~GameObject() { }
 /*                  GETTERS                       */
 /* ********************************************** */
 
-GLuint GameObject::getID() const { return ID; }
+unsigned int GameObject::getID() const { return ID; }
 
 Shader *GameObject::getShader() const { return shader; }
 
-glm::vec2 GameObject::getPosition() const { return position; }
+Texture2D *GameObject::getTexture() const { return texture; }
 
-GLint GameObject::getWidth() const { return width; }
+glm::vec2 GameObject::getOrigin() const { return origin; }
 
-GLint GameObject::getHeight() const { return height; }
+int GameObject::getWidth() const { return width; }
+
+int GameObject::getHeight() const { return height; }
+
+glm::vec2 GameObject::getCenter() const { return origin + glm::vec2(width * 0.5f, height * 0.5f); }
 
 /* ********************************************** */
 /*                  SETTERS                       */
 /* ********************************************** */
 
-void GameObject::setPosition(glm::vec2 position) {
-    this->position = position;
+void GameObject::setOrigin(glm::vec2 origin) { this->origin = origin; }
+
+void GameObject::setShader(Shader *shader) { this->shader = shader; }
+
+void GameObject::setTexture(Texture2D *texture) { this->texture = texture; }
+
+void GameObject::setWidth(int width) { 
+    if(width < 0) {
+        std::cerr << "Game Object width must be a non-negative integer" << std::endl;
+        return;
+    }
+
+    this->width = width; 
+}
+
+void GameObject::setHeight(int height) { 
+    if(height < 0) {
+        std::cerr << "Game Object height must be a non-negative integer" << std::endl;
+        return;
+    }
+
+    this->height = height; 
 }
 
 /* ********************************************** */
@@ -111,13 +90,12 @@ void GameObject::render(int screenWidth, int screenHeight) {
     shader->use();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::translate(model, glm::vec3(origin, 0.0f));
     model = glm::translate(model, glm::vec3(0.5f * width, 0.5f * height, 0.0f));
-    model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::translate(model, glm::vec3(-0.5f * width, -0.5f * height, 0.0f));
     model = glm::scale(model, glm::vec3(width, height, 1.0f));
 
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+    shader->setUniformMatrix4f(model, "model");
 
     glm::mat4 projection = glm::ortho(
         0.0f,
@@ -128,17 +106,9 @@ void GameObject::render(int screenWidth, int screenHeight) {
         1.0f
     );
 
-    glUniformMatrix4fv(
-        glGetUniformLocation(shader->getProgramID(), "projection"),
-        1, GL_FALSE, glm::value_ptr(projection)
-    );
+    shader->setUniformMatrix4f(projection, "projection");
 
     glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered 
 }
 
-void GameObject::translate(glm::vec2 position) { setPosition(position); }
-
-void GameObject::rotate(float degree) {
-    float radians = degree *  M_PI / 180;
-    rotationAngle = radians;
-} 
+void GameObject::translate(glm::vec2 position) { setOrigin(position); }

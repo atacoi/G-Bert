@@ -11,7 +11,6 @@
 #include "shader.h"
 #include "resource_manager.h"
 #include "cube.h"
-#include "board.h"
 #include "g_bert.h"
 #include "texture2d.h"
 
@@ -56,57 +55,25 @@ int main() {
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
 
-    Shader _default("default.vertex", "default.fragment");
+    game.init();
 
-    Shader _sprite("sprite.vertex", "sprite.fragment");
-    Texture2D _tex2D("q_bert.png");
-
-    game.initializeVAO();
-
-    // Cube g(&s);
-
-    // game.addGameObject(&g);
-
-    Board board(&_default, 7, glm::vec2(game.getScreenWidth() / 2.0f, 200.0f));
-
-    GBert gbert(&_sprite, &_tex2D, 100, 100);
-
-    board.addGameObjectsToGame(&game);
-    game.addGameObject(&gbert);
-
-    double prevTime = glfwGetTime();
-    double delta = 1.0;
-
-    int direction = 1; // down    
-    GameObject *curr = board.getGameObject(0);
-    Cube *cube = dynamic_cast<Cube*>(curr);
-    gbert.setPosition(cube->getTopCenter() - glm::vec2(gbert.getWidth() * 0.5f, gbert.getHeight()));
+    double SPF = 1.0 / 60.0;
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     glDisable(GL_MULTISAMPLE);
 
+    double prevTime = glfwGetTime();
     while(!glfwWindowShouldClose(window)) {
+        double delta = glfwGetTime() - prevTime;
+        game.update((float)delta);
         game.render(window);
-
-        if(glfwGetTime() - prevTime >= delta) {
-            GameObject *nxt = direction == 1 ? board.getChildGameObject(curr, TREE_DIRECTION_TYPE::LEFT) 
-                                             : board.getParentGameObject(curr, TREE_DIRECTION_TYPE::RIGHT);
-            if(nxt) {
-                Cube *cube = nullptr;
-                if((cube = dynamic_cast<Cube*>(nxt))) {
-                    gbert.setPosition(cube->getTopCenter() - glm::vec2(gbert.getWidth() * 0.5f, gbert.getHeight()));
-                    cube->step();
-                }
-                curr = nxt;
-                prevTime = glfwGetTime();
-            } else {
-                direction *= -1;
-            }
+        glfwPollEvents();
+        if(glfwGetTime() < SPF) {
+            glfwWaitEventsTimeout(SPF - glfwGetTime());
         }
 
-        glfwPollEvents();
+        prevTime = glfwGetTime();
     }
 
     glfwDestroyWindow(window);

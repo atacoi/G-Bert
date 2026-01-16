@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <glad/glad.h>
+
 #include <iostream>
 
 class GameObject {
@@ -16,10 +17,11 @@ class GameObject {
         /*                CONSTRUCTORS                    */
         /* ********************************************** */
 
-        GameObject();
-        GameObject(Shader *shader);
-        GameObject(Shader *shader, Texture2D *texture, GLint width, GLint height);
-        GameObject(Shader *shader, glm::vec2 position, GLint width, GLint height);
+        GameObject(glm::vec2 origin   = glm::vec2(0.0f, 0.0f),
+                   Shader *shader     = nullptr, 
+                   Texture2D *texture = nullptr, 
+                   int width          = 10, 
+                   int height         = 10);
 
         /* ********************************************** */
         /*                DESTRUCTORS                     */
@@ -31,17 +33,27 @@ class GameObject {
         /*                  GETTERS                       */
         /* ********************************************** */
 
-        GLuint getID() const;
-        Shader *getShader() const;
-        glm::vec2 getPosition() const;
-        GLint getWidth() const;
-        GLint getHeight() const;
+        unsigned int getID() const;
+
+        glm::vec2 getOrigin() const;
+
+        Shader    *getShader()  const;
+        Texture2D *getTexture() const;
+
+        virtual int getWidth()  const;
+        virtual int getHeight() const;
+
+        virtual glm::vec2 getCenter() const;
 
         /* ********************************************** */
         /*                  SETTERS                       */
         /* ********************************************** */
 
-        void setPosition(glm::vec2 position);
+        void setOrigin(glm::vec2 origin);
+        void setShader(Shader *shader);
+        void setTexture(Texture2D *texture);
+        void setWidth(int width);
+        void setHeight(int height);
 
         /* ********************************************** */
         /*                  Utility                       */
@@ -49,15 +61,15 @@ class GameObject {
     
         virtual void render(int screenWidth, int screenHeight);
         virtual void translate(glm::vec2 position);
-        void rotate(float degree); // in degrees
 
     private:
-        Shader *shader;
+        unsigned int ID;
+
+        glm::vec2 origin; // top-left corner
+
+        Shader    *shader;
         Texture2D *texture;
-        glm::vec2 position; 
-        GLfloat rotationAngle;
-        GLint width; 
-        GLint height; 
-        GLuint ID;
-        GLint modelUniformLocation;
+
+        int width; 
+        int height; 
 };

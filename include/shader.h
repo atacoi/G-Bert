@@ -1,8 +1,11 @@
 #pragma once
 
 #include <glad/glad.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
-#include <string.h>
 
 class Shader {
     public:
@@ -25,21 +28,24 @@ class Shader {
         GLuint getProgramID();
 
         /* ********************************************** */
-        /*                UTILITY                         */
+        /*                UTILITIES                       */
         /* ********************************************** */
 
         void use();
 
+        void setUniformMatrix4f(glm::mat4 matrix, const std::string& uniformName);
+        void setUniform3f      (glm::vec3 vec, const std::string& uniformName);
+
     private:
-        GLuint programID;
+        unsigned int programID;
 
         /* ********************************************** */
-        /*                UTILITY                         */
+        /*                UTILITIES                       */
         /* ********************************************** */
 
-        GLuint createShader(const std::string &shaderSource, GLenum type, bool *failed);
+        unsigned int createShader(const std::string &shaderSource, GLenum type, bool *failed);
 
-        GLuint createShaderProgram(GLuint vertexShaderID, GLuint fragmentShaderID, bool *failed);
+        unsigned int createShaderProgram(unsigned int vertexShaderID, unsigned int fragmentShaderID, bool *failed);
 
         std::string readFileContents(const std::string &shaderFile);
 };

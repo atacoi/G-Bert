@@ -62,11 +62,12 @@ class Game {
         /* ********************************************** */
 
         bool isRunning();
+        void init();
+        void update(float delta);
         void render(GLFWwindow *window);
 
-        void initializeVAO();
-
         void addGameObject(GameObject *go);
+        void addGameObjects(const std::vector<GameObject*> &gos);
 
     private:
         int screenWidth;
@@ -74,6 +75,17 @@ class Game {
         std::string screenTitle;
         GAME_STATES currState;
         std::map<GLuint, GameObject*> gameObjectMap;
+        GameObject *player;
         GLuint QUAD_VAO;
 
+        /* ********************************************** */
+        /*                UTILITY                         */
+        /* ********************************************** */
+
+        void initializeVAO();
+        void initializeShaders();
+        void initializeTextures();
+        void initializeBoard(glm::vec2 origin);
+
+        void generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels);
 };

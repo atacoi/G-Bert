@@ -1,175 +1,66 @@
 #include "cube.h"
 
 /* ********************************************** */
-/*             STATIC VARIABLES                   */
-/* ********************************************** */
-
-glm::vec2 Cube::topBasis   = glm::normalize(glm::vec2(0.0f, -1.0f));  
-glm::vec2 Cube::leftBasis  = glm::normalize(glm::vec2(-1.0f, 0.5f));  
-glm::vec2 Cube::rightBasis = glm::normalize(glm::vec2(1.0f, 0.5f)); 
-
-glm::mat4 Cube::topMatrix = glm::mat4(
-                                glm::vec4(-Cube::leftBasis.x, -Cube::leftBasis.y, 0.0f, 0.0f),
-                                glm::vec4(-Cube::rightBasis.x, -Cube::rightBasis.y, 0.0f, 0.0f),
-                                glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
-                                glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
-                            );
-glm::mat4 Cube::leftMatrix = glm::mat4(
-                                glm::vec4(-Cube::rightBasis.x, -Cube::rightBasis.y, 0.0f, 0.0f),
-                                glm::vec4(Cube::topBasis.x, -Cube::topBasis.y, 0.0f, 0.0f),
-                                glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
-                                glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
-                              );  
-glm::mat4 Cube::rightMatrix = glm::mat4(
-                                glm::vec4(-Cube::leftBasis.x, -Cube::leftBasis.y, 0.0f, 0.0f),
-                                glm::vec4(Cube::topBasis.x, -Cube::topBasis.y, 0.0f, 0.0f),
-                                glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
-                                glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
-                              );  
-
-/* ********************************************** */
 /*                CONSTRUCTORS                    */
 /* ********************************************** */
 
-Cube::Cube(): GameObject::GameObject() {
-    topColors = {glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)};
-    leftColor = glm::vec3(0.0f, 1.0f, 0.0f);
-    rightColor =  glm::vec3(0.0f, 0.0f, 1.0f);
+Cube::Cube(glm::vec2 origin,
+           Shader *shader,
+           int sideLen):
+           RectangularPrism::RectangularPrism(origin, shader, sideLen, sideLen, sideLen)
+{
 
-    completionCount = 1; 
-    currentCount = 0;  
-
-    sideLen = 100;
 }
 
-Cube::Cube(Shader *s): GameObject::GameObject(s) {
-    topColors = {glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)};
-    leftColor = glm::vec3(0.0f, 1.0f, 0.0f);
-    rightColor =  glm::vec3(0.0f, 0.0f, 1.0f);
+// GameObject *Board::getChildGameObject(GameObject *currObject, TREE_DIRECTION_TYPE tdt) {
+//     if(numObjects == 0) return nullptr;
 
-    completionCount = 1; 
-    currentCount = 0;  
+//     GLuint index = currObject->getID() - board[0][0]->getID();
 
-    sideLen = 100;
-}
+//     if(index >= numObjects) {
+//         std::cerr << "index:" << index << "is out of range" << std::endl;
+//         return nullptr; 
+//     }
 
-Cube::Cube(Shader *shader, glm::vec2 position, GLint sideLen): GameObject::GameObject(shader, position, sideLen, sideLen) {
-    topColors = {glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f)};
-    leftColor = glm::vec3(0.0f, 1.0f, 0.0f);
-    rightColor =  glm::vec3(0.0f, 0.0f, 1.0f);
+//     if(tdt != TREE_DIRECTION_TYPE::LEFT && tdt != TREE_DIRECTION_TYPE::RIGHT) {
+//         std::cerr << "Child type:" << tdt << "not recognized" << std::endl;
+//         return nullptr;
+//     }
 
-    completionCount = 1; 
-    currentCount = 0;  
+//     GLuint level = std::floor(std::sqrt(2.0f * index + 1.0f / 4.0f) - 1.0f / 2.0f) + 1;
+//     GLuint prevLevel = level - 1;
+//     GLuint nextLevel = level + 1; // 1 indexed 
+//     GLuint col = index - (prevLevel) * (prevLevel + 1) / 2.0f;
 
-    this->sideLen = sideLen;
-}
+//     // out of bounds
+//     if(nextLevel * (nextLevel + 1) / 2 > numObjects) return nullptr;
 
-/* ********************************************** */
-/*                Utility                         */
-/* ********************************************** */
+//     // always one extra cube on the next level preventing index out of bounds
+//     return tdt == TREE_DIRECTION_TYPE::LEFT ? board[nextLevel - 1][col] : board[nextLevel - 1][col+1]; 
+// }
 
-void Cube::render(int screenWidth, int screenHeight) {
-    /* ********************************************** */
-    /*                TOP                             */
-    /* ********************************************** */
+// GameObject *Board::getParentGameObject(GameObject *currObject, TREE_DIRECTION_TYPE tdt) {
+//     if(numObjects == 0) return nullptr;
 
-    Shader *shader = getShader();
+//     GLuint index = currObject->getID() - board[0][0]->getID();
 
-    if(!shader) {
-        std::cerr << "Shader is not defined for game object with ID" << getID() << std::endl;
-        return;
-    }
+//     if(index >= numObjects) {
+//         std::cerr << "index:" << index << "is out of range" << std::endl;
+//         return nullptr; 
+//     }
 
-    shader->use();
+//     if(tdt != TREE_DIRECTION_TYPE::LEFT && tdt != TREE_DIRECTION_TYPE::RIGHT) {
+//         std::cerr << "Parent type:" << tdt << "not recognized" << std::endl;
+//         return nullptr;
+//     }
 
-    glm::vec2 pos = getPosition();
+//     GLuint level = std::floor(std::sqrt(2.0f * index + 1.0f / 4.0f) - 1.0f / 2.0f) + 1;
+//     GLuint prevLevel = level - 1;
+//     GLuint col = index - (prevLevel) * (prevLevel + 1) / 2.0f;
 
-    glm::mat4 projection = glm::ortho(
-                                        0.0f,
-                                        (float)screenWidth,
-                                        (float)screenHeight,
-                                        0.0f,
-                                        -1.0f,
-                                        1.0f
-                                     );
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+//     if(prevLevel == 0 || 
+//        (tdt == TREE_DIRECTION_TYPE::LEFT && col == 0) ||
+//        (tdt == TREE_DIRECTION_TYPE::RIGHT && col == level - 1)) return nullptr;
 
-    glm::mat4 model = glm::mat4(1.0f);
-
-    model = glm::translate(model, glm::vec3(pos, 0.0f));
-    model = glm::scale(model, glm::vec3(sideLen, sideLen, 1.0f));
-    model = model * topMatrix;
-
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-    glUniform3fv(glGetUniformLocation(shader->getProgramID(), "color"), 1, glm::value_ptr(topColors[currentCount]));
-    
-    glDrawArrays(GL_TRIANGLES, 0, 6); // assumes that the VAO is bound before each object is rendered and projection is set
-
-    /* ********************************************** */
-    /*                LEFT                            */
-    /* ********************************************** */
-
-    model = glm::mat4(1.0f);
-
-    model = glm::translate(model, glm::vec3(pos, 0.0f));
-    model = glm::scale(model, glm::vec3(sideLen, sideLen, 1.0f));
-    model = model * leftMatrix;
-
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-    glUniform3fv(glGetUniformLocation(shader->getProgramID(), "color"), 1, glm::value_ptr(leftColor));
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    /* ********************************************** */
-    /*                RIGHT                           */
-    /* ********************************************** */
-
-    model = glm::mat4(1.0f);
-
-    model = glm::translate(model, glm::vec3(pos, 0.0f));
-    model = glm::scale(model, glm::vec3(sideLen, sideLen, 1.0f));
-    model = model * rightMatrix;
-
-    glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-    glUniform3fv(glGetUniformLocation(shader->getProgramID(), "color"), 1, glm::value_ptr(rightColor));
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    // model = glm::mat4(1.0f);
-
-    // model = glm::translate(model, glm::vec3(getTopCenter(), 0.0f));
-    // model = glm::scale(model, glm::vec3(sideLen, sideLen, 1.0f));
-
-    // glUniformMatrix4fv(glGetUniformLocation(shader->getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-    // glUniform3fv(glGetUniformLocation(shader->getProgramID(), "color"), 1, glm::value_ptr(rightColor));
-
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
-void Cube::step() { 
-    // if(currentCount >= completionCount) return;
-    //currentCount += 1; 
-    currentCount = (currentCount + 1) % topColors.size();
-}
-
-glm::vec2 Cube::getTopCenter() {
-    glm::vec2 position = getPosition();
-    glm::vec2 center = position - (sideLen / 2.0f * rightBasis) - (sideLen / 2.0f * leftBasis); 
-    return center;
-}
-
-glm::vec2 Cube::getLeftCenter() {
-    glm::vec2 position = getPosition();
-    glm::vec2 center = position - (sideLen / 2.0f * rightBasis) - (sideLen / 2.0f * topBasis); 
-    return center;
-}
-
-glm::vec2 Cube::getRightCenter() {
-    glm::vec2 position = getPosition();
-    glm::vec2 center = position - (sideLen / 2.0f * leftBasis) - (sideLen / 2.0f * topBasis); 
-    return center;
-}
+//     return tdt == TREE_DIRECTION_TYPE::LEFT ? board[prevLevel - 1][col - 1] : board[prevLevel - 1][col]; 
+// }

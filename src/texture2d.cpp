@@ -12,7 +12,7 @@ Texture2D::Texture2D(std::string imageFile) {
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
 
-    const char *imagePath = (std::string(TEXTURE_FOLDER) + imageFile).c_str();
+    std::string imagePath = std::string(std::string(TEXTURE_FOLDER) + imageFile);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -20,7 +20,7 @@ Texture2D::Texture2D(std::string imageFile) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load(imagePath, 
+    unsigned char *data = stbi_load(imagePath.c_str(), 
                                     &width,
                                     &height,
                                     &nrChannels,
