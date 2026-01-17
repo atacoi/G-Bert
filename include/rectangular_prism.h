@@ -81,7 +81,7 @@ class RectangularPrism : public Platform {
 
         void render(int screenWidth, int screenHeight) override;
         
-        virtual void step(); // Called when G-Bert steps on a block
+        void step() override; // Called when G-Bert steps on a block
 
     private: 
         std::vector<glm::vec3> topColors; // a color for each step onto the block

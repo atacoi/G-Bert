@@ -91,8 +91,6 @@ void GameObject::render(int screenWidth, int screenHeight) {
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(origin, 0.0f));
-    model = glm::translate(model, glm::vec3(0.5f * width, 0.5f * height, 0.0f));
-    model = glm::translate(model, glm::vec3(-0.5f * width, -0.5f * height, 0.0f));
     model = glm::scale(model, glm::vec3(width, height, 1.0f));
 
     shader->setUniformMatrix4f(model, "model");

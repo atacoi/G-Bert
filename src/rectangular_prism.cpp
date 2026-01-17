@@ -55,7 +55,7 @@ RectangularPrism::RectangularPrism (glm::vec2 origin,
     setSideLength(sideLength);
     setSideHeight(sideHeight);
 
-    setCompletionCount(2);
+    setCompletionCount(1);
 
     std::vector<glm::vec3> topColors   = {glm::vec3(80.0f / 255.0f, 64.0f / 255.0f, 239.0f / 255.0f), 
                                           glm::vec3(223.0f / 255.0f, 223.0f / 255.0f, 0.0f)};
@@ -300,4 +300,4 @@ void RectangularPrism::step() {
 /*                UTILITY                         */
 /* ********************************************** */
 
-bool RectangularPrism::lenMatchesCompletionCount(std::vector<glm::vec3> colors) { return colors.size() == completionCount; }
+bool RectangularPrism::lenMatchesCompletionCount(std::vector<glm::vec3> colors) { return colors.size() - 1 == completionCount; }

@@ -50,6 +50,20 @@ std::string &Game::getTitle() { return screenTitle; }
 
 GAME_STATES Game::getCurrState() { return currState; }
 
+bool Game::getKey(int key) { 
+    if(key < 0 || key >= MAX_KEYS) {
+        return false;
+    }
+    return keys[key]; 
+}
+
+bool Game::getProcessed(int key) { 
+    if(key < 0 || key >= MAX_KEYS) {
+        return false;
+    }
+    return keysProcessed[key]; 
+}
+
 /* ********************************************** */
 /*                Setters                         */
 /* ********************************************** */
@@ -72,6 +86,20 @@ void Game::setScreenHeight(int height) {
 
 void Game::setCurrState(GAME_STATES state) { currState = state; }
 
+void Game::setKey(int key, bool val) { 
+    if(key < 0 || key >= MAX_KEYS) {
+        return;
+    }
+    keys[key] = val; 
+}
+
+void Game::setProcessed(int key, bool val) { 
+    if(key < 0 || key >= MAX_KEYS) {
+        return;
+    }
+    keysProcessed[key] = val; 
+}
+
 /* ********************************************** */
 /*                UTILITY                         */
 /* ********************************************** */
@@ -85,14 +113,24 @@ void Game::init() {
     initializeBoard(glm::vec2(screenWidth / 2.0f - 25.0f, screenHeight * 0.25));
 }
 
-void Game::update(float delta) {
-    // GBert *g = nullptr;
-    // GameObject *go = g->getCurrentObject();
-    // Cube *co = nullptr;
-    // if((g = dynamic_cast<GBert*>(player)) && (co = dynamic_cast<Cube*>(go))) {
-    //     Cube *nxt = dynamic_cast<Cube*>(board->getChildGameObject(co, TREE_DIRECTION_TYPE::LEFT));
-    //     g->jump(GBert::DIRECTIONS::NORTHWEST, delta, glm::vec2(co->getTopCenter().x - 0.5f * g->getWidth(), co->getTopCenter().y - g->getHeight()));
-    // }
+void Game::update(double delta) {
+    if(player->isAirBorne()) { 
+        player->jump(Entity::DIRECTIONS::NONE, delta);
+    } else {
+        Entity::DIRECTIONS direction = Entity::DIRECTIONS::NORTHEAST;
+        if(getKey(GLFW_KEY_W)) {
+            direction = Entity::DIRECTIONS::NORTHEAST;
+        } else if(getKey(GLFW_KEY_A)) {
+            direction = Entity::DIRECTIONS::NORTHWEST;
+        } else if(getKey(GLFW_KEY_D)) {
+            direction = Entity::DIRECTIONS::SOUTHEAST;
+        } else if(getKey(GLFW_KEY_S)) {
+            direction = Entity::DIRECTIONS::SOUTHWEST;
+        } else {
+            return;
+        }
+        player->jump(direction, delta);
+    }
 }
 
 void Game::render(GLFWwindow *window) {
@@ -157,15 +195,24 @@ void Game::initializeTextures() {
 }
 
 void Game::initializeBoard(glm::vec2 origin) {
-    glm::vec3 rectPrismSize = glm::vec3(50, 50, 50);
+    glm::vec3 rectPrismSize = glm::vec3(50, 50, 55);
 
     int levels = 7;
 
     Shader *shader = ResourceManager::getShader("default");
-    generatePlatforms(origin, shader, rectPrismSize, levels);
+    RectangularPrism *startingPrism = generatePlatforms(origin, shader, rectPrismSize, levels);
+
+    glm::vec2 o = glm::vec2(0.0f, 0.0f);
+
+    player = new GBert (o, 
+                        ResourceManager::getShader("sprite"), 
+                        ResourceManager::getTexture("g-bert")
+                    );
+    addGameObject(player);
+    player->setCurrentPlatform(startingPrism);
 }
 
-void Game::generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels) {
+RectangularPrism *Game::generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels) {
     std::vector<GameObject*> prevLevel;
     std::vector<GameObject*> currLevel;
 
@@ -177,24 +224,40 @@ void Game::generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectang
     glm::vec2 scaledLeftBasis  = (float) sideWidth   * RectangularPrism::leftBasis;
     glm::vec2 scaledRightBasis = (float) sideLength  * RectangularPrism::rightBasis;
 
+    RectangularPrism *startingPrism = nullptr;
+
     for(int i = 0; i < levels; i++) {
         if(!prevLevel.size()) {
             // level = 1
-            currLevel.push_back(new RectangularPrism(origin, shader, sideWidth, sideLength, sideHeight));
+            startingPrism = new RectangularPrism(origin, shader, sideWidth, sideLength, sideHeight);
+            currLevel.push_back(startingPrism);
             prevLevel = currLevel;
             currLevel = std::vector<GameObject*>();
         } else {
             // level > 1
             for(int j = 0; j <= i-1; j++) {
-                GameObject *prevPrism = prevLevel[j];
+                RectangularPrism *sndPrevPrism = j > 0 ? dynamic_cast<RectangularPrism*>(prevLevel[j - 1]) : nullptr;
+                RectangularPrism *prevPrism = dynamic_cast<RectangularPrism*>(prevLevel[j]);
                 glm::vec2 pos = prevPrism->getOrigin();
+
+                RectangularPrism *r = new RectangularPrism(pos + scaledLeftBasis - scaledTopBasis, shader, sideWidth, sideLength, sideHeight);
+                r->setNorthEast(prevPrism);
+                r->setNorthWest(sndPrevPrism);
+
+                if(sndPrevPrism) {
+                    sndPrevPrism->setSouthEast(r);
+                }
+
+                prevPrism->setSouthWest(r);
+
+                currLevel.push_back(r);
 
                 if(j == i - 1) {
                     // add an extra prism for last column
-                    currLevel.push_back(new RectangularPrism(pos + scaledLeftBasis - scaledTopBasis, shader, sideWidth, sideLength, sideHeight));
-                    currLevel.push_back(new RectangularPrism(pos + scaledRightBasis - scaledTopBasis, shader, sideWidth, sideLength, sideHeight));
-                } else {
-                    currLevel.push_back(new RectangularPrism(pos + scaledLeftBasis - scaledTopBasis, shader, sideWidth, sideLength, sideHeight));
+                    RectangularPrism *r = new RectangularPrism(pos + scaledRightBasis - scaledTopBasis, shader, sideWidth, sideLength, sideHeight);
+                    prevPrism->setSouthEast(r);
+                    r->setNorthWest(prevPrism);
+                    currLevel.push_back(r);
                 }
             }
             prevLevel = currLevel;
@@ -202,4 +265,5 @@ void Game::generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectang
         }
         addGameObjects(prevLevel); // previous level completed so add its objects
     }
+    return startingPrism;
 }

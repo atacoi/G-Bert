@@ -1,44 +1,12 @@
 #include "g_bert.h"
 
-/* ********************************************** */
-/*                CONSTRUCTORS                    */
-/* ********************************************** */
-
-GBert::GBert(Shader *shader, Texture2D *texture, GLint width, GLint height)
+GBert::GBert (glm::vec2 origin,
+              Shader *shader, 
+              Texture2D *texture, 
+              int width, 
+              int height,
+              float maxHeight,
+              float totalAirTime):
+              Entity::Entity(origin, shader, texture, width, height, maxHeight, totalAirTime)
 {
-
 }
-
-/* ********************************************** */
-/*                  GETTERS                       */
-/* ********************************************** */
-
-GameObject *GBert::getCurrentObject() { return currObject; }
-
-void GBert::render(int screenWidth, int screenHeight) {
-    Shader *shader = getShader();
-
-    if(!shader) {
-        std::cerr << "Shader is not defined for game object with ID" << getID() << std::endl;
-        return;
-    }
-
-    GameObject::render(screenWidth, screenHeight);
-}
-
-/* ********************************************** */
-/*                 UTILITIES                      */
-/* ********************************************** */
-
-// void GBert::jump(GBert::DIRECTIONS direction, float delta) {
-//     if(!currAirTime) {
-//         isAirBorne = true;
-//     }
-//     float norm = delta / totalAirTime;
-
-//     if(norm >= 1) {
-//         setOrigin(destination);
-//     } else {
-
-//     }
-// }

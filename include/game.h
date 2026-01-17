@@ -1,6 +1,9 @@
 #pragma once
 
 #include "game_object.h"
+#include "entity.h"
+#include "rectangular_prism.h"
+#include "global_constants.h"
 
 #include <glad/glad.h>
 #include <map>
@@ -48,6 +51,8 @@ class Game {
         int getScreenHeight();
         std::string &getTitle();
         GAME_STATES getCurrState();
+        bool getKey(int key);
+        bool getProcessed(int key);
 
         /* ********************************************** */
         /*                SETTERS                         */
@@ -56,6 +61,8 @@ class Game {
         void setScreenWidth(int width);
         void setScreenHeight(int height);
         void setCurrState(GAME_STATES state);
+        void setKey(int key, bool val);
+        void setProcessed(int key, bool val);
 
         /* ********************************************** */
         /*                UTILITY                         */
@@ -63,7 +70,7 @@ class Game {
 
         bool isRunning();
         void init();
-        void update(float delta);
+        void update(double delta);
         void render(GLFWwindow *window);
 
         void addGameObject(GameObject *go);
@@ -75,8 +82,10 @@ class Game {
         std::string screenTitle;
         GAME_STATES currState;
         std::map<GLuint, GameObject*> gameObjectMap;
-        GameObject *player;
+        Entity *player;
         GLuint QUAD_VAO;
+        bool keys[MAX_KEYS];
+        bool keysProcessed[MAX_KEYS];
 
         /* ********************************************** */
         /*                UTILITY                         */
@@ -87,5 +96,6 @@ class Game {
         void initializeTextures();
         void initializeBoard(glm::vec2 origin);
 
-        void generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels);
+        // returns a pointer to the starting prism
+        RectangularPrism *generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels);
 };

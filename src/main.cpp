@@ -14,6 +14,7 @@
 #include "g_bert.h"
 #include "texture2d.h"
 
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height); 
 void windowCloseCallback(GLFWwindow *window);
 
@@ -52,34 +53,59 @@ int main() {
 
     glViewport(0, 0, game.getScreenWidth(), game.getScreenHeight());
 
+    glfwSetKeyCallback(window, keyCallback);
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
 
     game.init();
 
-    double SPF = 1.0 / 60.0;
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_MULTISAMPLE);
 
+    const double SPF = 1.0 / 60.0;
+
     double prevTime = glfwGetTime();
-    while(!glfwWindowShouldClose(window)) {
-        double delta = glfwGetTime() - prevTime;
-        game.update((float)delta);
-        game.render(window);
-        glfwPollEvents();
-        if(glfwGetTime() < SPF) {
-            glfwWaitEventsTimeout(SPF - glfwGetTime());
+    double pauseTime = 1.0;
+
+    while (!glfwWindowShouldClose(window)) {
+        double currTime = glfwGetTime();
+        double delta = currTime - prevTime;
+        prevTime = currTime;
+
+        if (pauseTime > 0.0) {
+            pauseTime -= delta;
+        } else {
+            game.update(delta);
         }
 
-        prevTime = glfwGetTime();
+        game.render(window);
+        glfwPollEvents();
+
+        double frameTime = glfwGetTime() - currTime;
+        if (frameTime < SPF) {
+            glfwWaitEventsTimeout(SPF - frameTime);
+        }
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
 
     return 0;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    if (action == GLFW_PRESS) {
+        game.setKey(key, true);
+    } else if (action == GLFW_RELEASE) {
+        game.setKey(key, false);
+        game.setProcessed(key, false);
+    }
 }
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height) {

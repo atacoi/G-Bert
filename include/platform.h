@@ -34,6 +34,12 @@ class Platform : public GameObject {
         void setSouthWest(Platform *sw);
         void setSouthEast(Platform *se);
 
+        /* ********************************************** */
+        /*                  UTILITY                       */
+        /* ********************************************** */
+
+        virtual void step();
+
     private:
         Platform *northEast;
         Platform *northWest;

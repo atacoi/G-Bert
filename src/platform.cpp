@@ -37,3 +37,9 @@ void Platform::setNorthWest(Platform *nw) { this->northWest = nw; }
 void Platform::setSouthWest(Platform *sw) { this->southWest = sw; }
 
 void Platform::setSouthEast(Platform *se) { this->southEast = se; }
+
+/* ********************************************** */
+/*                  UTILITY                       */
+/* ********************************************** */
+
+void Platform::step() {}
