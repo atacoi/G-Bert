@@ -17,13 +17,13 @@ unsigned int STATIC_IDs = 0;
 /*                CONSTRUCTORS                    */
 /* ********************************************** */
 
-Game::Game(): screenTitle("G-Bert"), gameObjectMap() {
+Game::Game(): screenTitle("G-Bert"), gameObjectMap(), am() {
     screenWidth = 1280;
     screenHeight = 720;
     currState = GAME_STATES::ACTIVE;
 }
 
-Game::Game(int width, int height, const std::string &title): screenTitle(title), gameObjectMap()  {
+Game::Game(int width, int height, const std::string &title): screenTitle(title), gameObjectMap(), am()  {
     screenWidth = width;
     screenHeight = height;
     currState = GAME_STATES::ACTIVE;
@@ -35,6 +35,7 @@ Game::Game(int width, int height, const std::string &title): screenTitle(title),
 
 Game::~Game() {
     currState = GAME_STATES::TERMINATED;
+    freeGameObjects();
     glDeleteVertexArrays(1, &QUAD_VAO);
 }
 
@@ -113,11 +114,9 @@ void Game::init() {
     initializeBoard(glm::vec2(screenWidth / 2.0f - 25.0f, screenHeight * 0.25));
 }
 
-void Game::update(double delta) {
-    if(player->isAirBorne()) { 
-        player->jump(Entity::DIRECTIONS::NONE, delta);
-    } else {
-        Entity::DIRECTIONS direction = Entity::DIRECTIONS::NORTHEAST;
+void Game::update() {
+    if(!player->isAirBorne() && playerHasMoved()) { 
+        Entity::DIRECTIONS direction = Entity::DIRECTIONS::NONE;
         if(getKey(GLFW_KEY_W)) {
             direction = Entity::DIRECTIONS::NORTHEAST;
         } else if(getKey(GLFW_KEY_A)) {
@@ -127,10 +126,28 @@ void Game::update(double delta) {
         } else if(getKey(GLFW_KEY_S)) {
             direction = Entity::DIRECTIONS::SOUTHWEST;
         } else {
-            return;
+            direction = Entity::DIRECTIONS::NONE;
         }
-        player->jump(direction, delta);
+        
+        player->initJump(direction);
+
+        auto jrunning = [this] (float delta) { player->jumpRunning(delta); };
+
+        auto jcleanupDelay = [this] () { player->jumpCleanupDelay(); };
+
+        auto jcleanup = [this] () { player->jumpCleanup(); };
+
+        struct AnimationCallbacks ac = { .runningCallback = jrunning, .cleanupDelayCallback = jcleanupDelay, .cleanupCallback = jcleanup };
+
+        struct AnimationTimes     at = { 0.0f };
+        at.runningTime = 0.4167f;
+        at.cleanupDelayTime = 0.133f;
+        am.push(&at, &ac);
     }
+}
+
+void Game::fireAnimations(float delta) {
+    am.fire(delta);
 }
 
 void Game::render(GLFWwindow *window) {
@@ -266,4 +283,12 @@ RectangularPrism *Game::generatePlatforms(glm::vec2 origin, Shader *shader, glm:
         addGameObjects(prevLevel); // previous level completed so add its objects
     }
     return startingPrism;
+}
+
+bool Game::playerHasMoved() { return getKey(GLFW_KEY_W) || getKey(GLFW_KEY_A) || getKey(GLFW_KEY_S) || getKey(GLFW_KEY_D); }
+
+void Game::freeGameObjects() {
+    for (auto &gameObject : gameObjectMap) {
+        delete gameObject.second;
+    }
 }

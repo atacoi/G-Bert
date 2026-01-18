@@ -66,19 +66,16 @@ int main() {
     const double SPF = 1.0 / 60.0;
 
     double prevTime = glfwGetTime();
-    double pauseTime = 1.0;
 
     while (!glfwWindowShouldClose(window)) {
         double currTime = glfwGetTime();
-        double delta = currTime - prevTime;
+
+        game.update();
+
+        float delta = (float) currTime - (float) prevTime;
         prevTime = currTime;
 
-        if (pauseTime > 0.0) {
-            pauseTime -= delta;
-        } else {
-            game.update(delta);
-        }
-
+        game.fireAnimations(delta);
         game.render(window);
         glfwPollEvents();
 
@@ -88,6 +85,8 @@ int main() {
         }
     }
 
+    ResourceManager::cleanup();
+    
     glfwDestroyWindow(window);
     glfwTerminate();
 

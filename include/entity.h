@@ -4,6 +4,8 @@
 
 #include "platform.h"
 
+#include <functional>
+
 class Entity : public GameObject {
     public:
         enum DIRECTIONS {
@@ -33,7 +35,6 @@ class Entity : public GameObject {
 
         bool isAirBorne();
         float getMaxJumpHeight();
-        float getCurrentAirTime();
         float getTotalAirTime();
 
         int getFrameCount();
@@ -54,14 +55,19 @@ class Entity : public GameObject {
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        virtual void jump(DIRECTIONS dir, double delta);
+        // returns a callback and cleanup
+        virtual void initJump(DIRECTIONS dir);
+
+        virtual void jumpRunning(float delta);
+        virtual void jumpCleanupDelay();
+        virtual void jumpCleanup();
 
     private:
         Platform *currPlatform; // object the entity is standing on
+        Platform *nxtPlatform; // set when jumping
 
         bool airBorne;
         float maxJumpHeight; 
-        float currAirTime;
         float totalAirTime;
 
         int frameCount; // number of animation frames
@@ -69,6 +75,4 @@ class Entity : public GameObject {
         glm::vec2 startPos; // before the jump
         glm::vec2 peakPos;  // the highest spot
         glm::vec2 endPos;   // after the jump
-
-        Entity::DIRECTIONS currDirection;
 };

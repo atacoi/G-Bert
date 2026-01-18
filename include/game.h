@@ -4,6 +4,7 @@
 #include "entity.h"
 #include "rectangular_prism.h"
 #include "global_constants.h"
+#include "animation_manager.h"
 
 #include <glad/glad.h>
 #include <map>
@@ -70,7 +71,8 @@ class Game {
 
         bool isRunning();
         void init();
-        void update(double delta);
+        void update();
+        void fireAnimations(float delta);
         void render(GLFWwindow *window);
 
         void addGameObject(GameObject *go);
@@ -86,6 +88,7 @@ class Game {
         GLuint QUAD_VAO;
         bool keys[MAX_KEYS];
         bool keysProcessed[MAX_KEYS];
+        AnimationManager am;
 
         /* ********************************************** */
         /*                UTILITY                         */
@@ -98,4 +101,8 @@ class Game {
 
         // returns a pointer to the starting prism
         RectangularPrism *generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels);
+
+        bool playerHasMoved();
+
+        void freeGameObjects();
 };

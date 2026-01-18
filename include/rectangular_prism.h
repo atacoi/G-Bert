@@ -99,5 +99,5 @@ class RectangularPrism : public Platform {
         /*                UTILITY                         */
         /* ********************************************** */
 
-        bool lenMatchesCompletionCount(std::vector<glm::vec3> colors);
+        bool lenMatchesCompletionCount(std::vector<glm::vec3> &colors);
 };

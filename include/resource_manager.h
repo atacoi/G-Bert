@@ -35,4 +35,6 @@ class ResourceManager {
         
         static void createTexture(const std::string &textureFileName, 
                                   const std::string &textureName);
+
+        static void cleanup();
 };

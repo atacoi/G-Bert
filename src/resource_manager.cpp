@@ -57,3 +57,13 @@ void ResourceManager::createTexture(const std::string &textureFileName,
     Texture2D *texture = new Texture2D(textureFileName);
     _textureMap.insert({textureName, texture});
 }
+
+void ResourceManager::cleanup() {
+    for (auto &shader : _shaderMap) {
+        free(shader.second);
+    }
+
+    for (auto &texture : _textureMap) {
+        free(texture.second);
+    }
+}

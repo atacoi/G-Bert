@@ -27,7 +27,7 @@ class GameObject {
         /*                DESTRUCTORS                     */
         /* ********************************************** */
 
-        ~GameObject();
+        virtual ~GameObject();
 
         /* ********************************************** */
         /*                  GETTERS                       */

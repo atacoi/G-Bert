@@ -17,6 +17,6 @@ class GBert : public Entity {
                Texture2D *texture = nullptr, 
                int width          = 50, 
                int height         = 55,
-               float maxHeight    = 30.0f,
+               float maxHeight    = 40.0f,
                float totalAirTime = 0.46f);
 };

@@ -300,4 +300,4 @@ void RectangularPrism::step() {
 /*                UTILITY                         */
 /* ********************************************** */
 
-bool RectangularPrism::lenMatchesCompletionCount(std::vector<glm::vec3> colors) { return colors.size() - 1 == completionCount; }
+bool RectangularPrism::lenMatchesCompletionCount(std::vector<glm::vec3> &colors) { return colors.size() - 1 == completionCount; }
