@@ -1,35 +1,39 @@
 #include "animation_manager.h"
 
 /* ********************************************** */
-/*                CONSTRUCTORS                    */
+/*                Static Fields                   */
 /* ********************************************** */
 
-AnimationManager::AnimationManager(): animationList() {}
+std::list<Animation*> AnimationManager::_animationList; 
+
+/* ********************************************** */
+/*               Static Functions                 */
+/* ********************************************** */
 
 /* ********************************************** */
 /*                  UTILITY                       */
 /* ********************************************** */
 
 Animation *AnimationManager::pop() {
-    if(animationList.empty()) return nullptr;
+    if(_animationList.empty()) return nullptr;
     
-    Animation *top = animationList.front();
-    animationList.pop_front();
+    Animation *top = _animationList.front();
+    _animationList.pop_front();
     return top;
 }
 
 void AnimationManager::push(struct AnimationTimes *at, AnimationCallbacks *ac) {
-    animationList.push_back(new Animation(at, ac));
+    _animationList.push_back(new Animation(at, ac));
 }
 
 
 void AnimationManager::fire(float delta) {
-    for(std::list<Animation*>::iterator it = animationList.begin(); it != animationList.end(); ) {
+    for(std::list<Animation*>::iterator it = _animationList.begin(); it != _animationList.end(); ) {
         Animation *a = *it;
         a->fire(delta);
         if(a->hasFinished()) {
             delete a;
-            it = animationList.erase(it);
+            it = _animationList.erase(it);
         } else {
             ++it;
         }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "game_object.h"
-
 #include "platform.h"
 
 #include <functional>
+#include <GLFW/glfw3.h>
 
 class Entity : public GameObject {
     public:
@@ -13,7 +13,6 @@ class Entity : public GameObject {
             NORTHWEST,
             SOUTHWEST,
             SOUTHEAST,
-            NONE
         };
 
         /* ********************************************** */
@@ -55,12 +54,9 @@ class Entity : public GameObject {
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        // returns a callback and cleanup
-        virtual void initJump(DIRECTIONS dir);
+        virtual void update(const bool *keys);
 
-        virtual void jumpRunning(float delta);
-        virtual void jumpCleanupDelay();
-        virtual void jumpCleanup();
+        virtual void jump(DIRECTIONS dir); 
 
     private:
         Platform *currPlatform; // object the entity is standing on
@@ -75,4 +71,16 @@ class Entity : public GameObject {
         glm::vec2 startPos; // before the jump
         glm::vec2 peakPos;  // the highest spot
         glm::vec2 endPos;   // after the jump
+
+        /* ********************************************** */
+        /*                  UTILITY                       */
+        /* ********************************************** */
+
+        void initJump(DIRECTIONS dir);
+
+        void jumpRunning(float delta);
+        void jumpCleanupDelay();
+        void jumpCleanup();
+
+        bool playerHasMoved(const bool *keys);
 };

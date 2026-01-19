@@ -17,13 +17,13 @@ unsigned int STATIC_IDs = 0;
 /*                CONSTRUCTORS                    */
 /* ********************************************** */
 
-Game::Game(): screenTitle("G-Bert"), gameObjectMap(), am() {
+Game::Game(): screenTitle("G-Bert"), gameObjectMap() {
     screenWidth = 1280;
     screenHeight = 720;
     currState = GAME_STATES::ACTIVE;
 }
 
-Game::Game(int width, int height, const std::string &title): screenTitle(title), gameObjectMap(), am()  {
+Game::Game(int width, int height, const std::string &title): screenTitle(title), gameObjectMap()  {
     screenWidth = width;
     screenHeight = height;
     currState = GAME_STATES::ACTIVE;
@@ -115,39 +115,17 @@ void Game::init() {
 }
 
 void Game::update() {
-    if(!player->isAirBorne() && playerHasMoved()) { 
-        Entity::DIRECTIONS direction = Entity::DIRECTIONS::NONE;
-        if(getKey(GLFW_KEY_W)) {
-            direction = Entity::DIRECTIONS::NORTHEAST;
-        } else if(getKey(GLFW_KEY_A)) {
-            direction = Entity::DIRECTIONS::NORTHWEST;
-        } else if(getKey(GLFW_KEY_D)) {
-            direction = Entity::DIRECTIONS::SOUTHEAST;
-        } else if(getKey(GLFW_KEY_S)) {
-            direction = Entity::DIRECTIONS::SOUTHWEST;
-        } else {
-            direction = Entity::DIRECTIONS::NONE;
+    for (auto &gameObject : gameObjectMap) {
+        GameObject *go = gameObject.second;
+        Entity *e = nullptr;
+        if((e = dynamic_cast<Entity*>(go))) {
+            e->update(keys);
         }
-        
-        player->initJump(direction);
-
-        auto jrunning = [this] (float delta) { player->jumpRunning(delta); };
-
-        auto jcleanupDelay = [this] () { player->jumpCleanupDelay(); };
-
-        auto jcleanup = [this] () { player->jumpCleanup(); };
-
-        struct AnimationCallbacks ac = { .runningCallback = jrunning, .cleanupDelayCallback = jcleanupDelay, .cleanupCallback = jcleanup };
-
-        struct AnimationTimes     at = { 0.0f };
-        at.runningTime = 0.4167f;
-        at.cleanupDelayTime = 0.133f;
-        am.push(&at, &ac);
     }
 }
 
 void Game::fireAnimations(float delta) {
-    am.fire(delta);
+    AnimationManager::fire(delta);
 }
 
 void Game::render(GLFWwindow *window) {
@@ -285,10 +263,9 @@ RectangularPrism *Game::generatePlatforms(glm::vec2 origin, Shader *shader, glm:
     return startingPrism;
 }
 
-bool Game::playerHasMoved() { return getKey(GLFW_KEY_W) || getKey(GLFW_KEY_A) || getKey(GLFW_KEY_S) || getKey(GLFW_KEY_D); }
-
 void Game::freeGameObjects() {
     for (auto &gameObject : gameObjectMap) {
         delete gameObject.second;
     }
+    gameObjectMap.clear();
 }

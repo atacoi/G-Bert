@@ -1,5 +1,7 @@
 #include "entity.h"
 #include "rectangular_prism.h"
+#include "animation.h"
+#include "animation_manager.h"
 
 /* ********************************************** */
 /*                   PUBLIC                       */
@@ -58,6 +60,44 @@ void Entity::setFrameCount(int frameCount) { this->frameCount = std::max(frameCo
 /*                  UTILITY                       */
 /* ********************************************** */
 
+void Entity::update(const bool *keys) {
+    if(!isAirBorne() && playerHasMoved(keys)) { 
+        Entity::DIRECTIONS direction = Entity::DIRECTIONS::NORTHEAST;
+        if(keys[GLFW_KEY_W]) {
+            direction = Entity::DIRECTIONS::NORTHEAST;
+        } else if(keys[GLFW_KEY_A]) {
+            direction = Entity::DIRECTIONS::NORTHWEST;
+        } else if(keys[GLFW_KEY_D]) {
+            direction = Entity::DIRECTIONS::SOUTHEAST;
+        } else {
+            direction = Entity::DIRECTIONS::SOUTHWEST;
+        } 
+        
+        jump(direction);
+    }
+}
+
+void Entity::jump(Entity::DIRECTIONS dir) {
+    initJump(dir);
+    struct AnimationCallbacks ac = { .startupDelayCallback = nullptr, 
+                                     .runningCallback = [this] (float delta) { jumpRunning(delta); }, 
+                                     .cleanupDelayCallback = [this] () { jumpCleanupDelay(); },
+                                     .cleanupCallback = [this] () { jumpCleanup(); }};
+    struct AnimationTimes at = { .startupDelayTime = 0.0f,
+                                 .runningTime = 0.42f,
+                                 .cleanupDelayTime = 0.133f };
+
+    AnimationManager::push(&at, &ac);
+}
+
+/* ********************************************** */
+/*                  PRIVATE                       */
+/* ********************************************** */
+
+/* ********************************************** */
+/*                  UTILITY                       */
+/* ********************************************** */
+
 void Entity::initJump(DIRECTIONS dir) {
     if (!currPlatform || airBorne) return;
 
@@ -76,10 +116,6 @@ void Entity::initJump(DIRECTIONS dir) {
 
         case Entity::DIRECTIONS::SOUTHWEST:
             nxtPlatform = currPlatform->getSouthWest();
-            break;
-
-        case Entity::DIRECTIONS::NONE:
-            std::cout << "dealing with none" << std::endl;
             break;
     }
 
@@ -133,3 +169,5 @@ void Entity::jumpCleanupDelay() {
 void Entity::jumpCleanup() {
     airBorne = false;
 }
+
+bool Entity::playerHasMoved(const bool *keys) { return keys[GLFW_KEY_W] || keys[GLFW_KEY_A] || keys[GLFW_KEY_S] || keys[GLFW_KEY_D]; }

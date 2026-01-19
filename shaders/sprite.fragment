@@ -7,11 +7,10 @@ out vec4 FragColor;
 uniform sampler2D texture1;
 
 uniform int frameIndex;
-uniform float columnCount;
-uniform float rowCount;
+uniform int columnCount;
 
 void main() {
-    vec2 tmp = vec2(TexCoords.x / 8.0 + 7.0 / 8.0, TexCoords.y);
+    vec2 tmp = vec2(TexCoords.x / columnCount + float(frameIndex) / float(columnCount), TexCoords.y);
 
     vec4 texColor = texture(texture1, tmp);
     FragColor = texColor;

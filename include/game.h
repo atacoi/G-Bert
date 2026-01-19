@@ -88,7 +88,6 @@ class Game {
         GLuint QUAD_VAO;
         bool keys[MAX_KEYS];
         bool keysProcessed[MAX_KEYS];
-        AnimationManager am;
 
         /* ********************************************** */
         /*                UTILITY                         */
@@ -101,8 +100,6 @@ class Game {
 
         // returns a pointer to the starting prism
         RectangularPrism *generatePlatforms(glm::vec2 origin, Shader *shader, glm::vec3 rectangularPrismSize, int levels);
-
-        bool playerHasMoved();
 
         void freeGameObjects();
 };

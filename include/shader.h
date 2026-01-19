@@ -35,6 +35,7 @@ class Shader {
 
         void setUniformMatrix4f(glm::mat4 matrix, const std::string& uniformName);
         void setUniform3f      (glm::vec3 vec, const std::string& uniformName);
+        void setUniform1i      (int i, const std::string& uniformName);
 
     private:
         unsigned int programID;

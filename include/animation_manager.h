@@ -9,21 +9,22 @@
 class AnimationManager {
     public:
         /* ********************************************** */
-        /*                CONSTRUCTORS                    */
+        /*                Static Fields                   */
         /* ********************************************** */
 
-        AnimationManager();
+        static std::list<Animation*> _animationList; // a doubly-linked list
+
+        /* ********************************************** */
+        /*               Static Functions                 */
+        /* ********************************************** */
         
         /* ********************************************** */
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        Animation *pop();
+        static Animation *pop();
 
-        void push(struct AnimationTimes *at, AnimationCallbacks *ac);
+        static void push(struct AnimationTimes *at, AnimationCallbacks *ac);
 
-        void fire(float delta);
-
-    private:
-        std::list<Animation*> animationList; // a doubly-linked list
+        static void fire(float delta);
 };
