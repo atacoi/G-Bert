@@ -76,19 +76,21 @@ class Entity : public GameObject {
         virtual void jumpCleanupDelay();
         virtual void jumpCleanup();
 
+    protected:
+        glm::vec2 startPos; // before the jump
+        glm::vec2 peakPos;  // the highest spot
+        glm::vec2 endPos;   // after the jump
+
+        Platform *nxtPlatform; // set when jumping
+
     private:
         Platform *currPlatform; // object the entity is standing on
-        Platform *nxtPlatform; // set when jumping
 
         bool airBorne;
         float maxJumpHeight; 
 
         int frameCount; // number of animation frames
         int currFrame;
-
-        glm::vec2 startPos; // before the jump
-        glm::vec2 peakPos;  // the highest spot
-        glm::vec2 endPos;   // after the jump
 
         bool playerHasMoved(const bool *keys);
 

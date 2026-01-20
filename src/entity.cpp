@@ -93,7 +93,7 @@ void Entity::jump(Entity::DIRECTIONS dir) {
                                  .runningTime = 0.42f * (endPos.y - peakPos.y) / (maxJumpHeight * (endPos.y - startPos.y) / 77.0f + 77.0f),
                                  .cleanupDelayTime = 0.133f };
 
-    AnimationManager::push(&at, &ac);
+    AnimationManager::push(this->getID(), &at, &ac);
 }
 
 void Entity::render(int screenWidth, int screenHeight) {

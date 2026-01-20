@@ -4,7 +4,7 @@
 /*                Static Fields                   */
 /* ********************************************** */
 
-std::list<Animation*> AnimationManager::_animationList; 
+std::map<unsigned int, Animation*> AnimationManager::_animationMap;
 
 /* ********************************************** */
 /*               Static Functions                 */
@@ -14,26 +14,37 @@ std::list<Animation*> AnimationManager::_animationList;
 /*                  UTILITY                       */
 /* ********************************************** */
 
-Animation *AnimationManager::pop() {
-    if(_animationList.empty()) return nullptr;
+Animation *AnimationManager::remove(unsigned int gameObjectID) {
+    if(_animationMap.empty()) return nullptr;
     
-    Animation *top = _animationList.front();
-    _animationList.pop_front();
-    return top;
+    auto it = _animationMap.find(gameObjectID);
+    if(it == _animationMap.end()) {
+        return nullptr;
+    }
+    _animationMap.erase(it);
+    return it->second;
 }
 
-void AnimationManager::push(struct AnimationTimes *at, AnimationCallbacks *ac) {
-    _animationList.push_back(new Animation(at, ac));
+void AnimationManager::removeAll(unsigned int gameObjectID) {
+    auto it = _animationMap.begin();
+    while(it != _animationMap.end()) {
+        it = _animationMap.erase(it);
+    }
+}
+
+
+void AnimationManager::push(unsigned int gameObjectID, struct AnimationTimes *at, AnimationCallbacks *ac) {
+    _animationMap.insert({ gameObjectID, new Animation(at, ac)});
 }
 
 
 void AnimationManager::fire(float delta) {
-    for(std::list<Animation*>::iterator it = _animationList.begin(); it != _animationList.end(); ) {
-        Animation *a = *it;
+    for(auto it = _animationMap.begin(); it != _animationMap.end(); ) {
+        Animation *a = it->second;
         a->fire(delta);
         if(a->hasFinished()) {
             delete a;
-            it = _animationList.erase(it);
+            it = _animationMap.erase(it);
         } else {
             ++it;
         }

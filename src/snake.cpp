@@ -1,5 +1,7 @@
 #include "snake.h"
 #include "rectangular_prism.h"
+#include "animation.h"
+#include "animation_manager.h"
 
 Snake::Snake (glm::vec2 origin,
               Shader *shader, 
@@ -37,7 +39,17 @@ void Snake::jump(Snake::DIRECTIONS dir) {
             break;
     }
     setCurrentFrame(frameIndex);
-    Entity::jump(dir);
+
+    initJump(dir);
+    struct AnimationCallbacks ac = { .startupDelayCallback = nullptr, 
+                                     .runningCallback = [this] (float delta) { jumpRunning(delta); }, 
+                                     .cleanupDelayCallback = [this] () { jumpCleanupDelay(); },
+                                     .cleanupCallback = [this] () { jumpCleanup(); }};
+    struct AnimationTimes at = { .startupDelayTime = 0.0f,
+                                 .runningTime = 0.69f * (endPos.y - peakPos.y) / (getMaxJumpHeight() * (endPos.y - startPos.y) / 77.0f + 77.0f),
+                                 .cleanupDelayTime = 0.133f };
+
+    AnimationManager::push(this->getID(), &at, &ac);
 }
 
 void Snake::update(const bool *keys, const Entity *player) {
@@ -95,5 +107,11 @@ void Snake::jumpCleanupDelay() {
             break;
     }
     setCurrentFrame(frameIndex);
-    Entity::jumpCleanupDelay();
+    if(endPos.y == 720.0f) {
+        setOrigin(startPos);
+    } else {
+       setCurrentPlatform(nxtPlatform);
+        setOrigin(endPos);
+    }
+    setRenderBehindPlatforms(false);
 }

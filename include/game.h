@@ -73,6 +73,7 @@ class Game {
         void init();
         void update();
         void fireAnimations(float delta);
+        void checkCollisions();
         void render(GLFWwindow *window);
 
         void addGameObject(GameObject *go);

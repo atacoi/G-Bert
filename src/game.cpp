@@ -129,6 +129,24 @@ void Game::fireAnimations(float delta) {
     AnimationManager::fire(delta);
 }
 
+void Game::checkCollisions() {
+    glm::vec2 playerPos = player->getOrigin();
+    Entity *e = nullptr;
+    for(auto &go : gameObjectMap) {
+        if(go.second != player && (e = dynamic_cast<Entity*>(go.second))) {
+            glm::vec2 enemyPos = e->getOrigin();
+            if(playerPos.x < enemyPos.x + e->getWidth() &&
+                playerPos.x + player->getWidth() > enemyPos.x &&
+                playerPos.y < enemyPos.y + e->getHeight() && 
+                playerPos.y + player->getHeight() > enemyPos.y) {
+                    AnimationManager::removeAll(player->getID());
+                    std::cout << "collided" << std::endl;
+                    break;
+                }
+        }   
+    }
+}
+
 void Game::render(GLFWwindow *window) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

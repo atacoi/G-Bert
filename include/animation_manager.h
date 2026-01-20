@@ -1,9 +1,10 @@
 #pragma once
 
 #include "animation.h"
+#include "game_object.h"
 
 #include <iostream>
-#include <list>
+#include <map>
 #include <functional>
 
 class AnimationManager {
@@ -12,7 +13,7 @@ class AnimationManager {
         /*                Static Fields                   */
         /* ********************************************** */
 
-        static std::list<Animation*> _animationList; // a doubly-linked list
+        static std::map<unsigned int, Animation*> _animationMap; // gameobject ID to the animation that is binded to it
 
         /* ********************************************** */
         /*               Static Functions                 */
@@ -22,9 +23,10 @@ class AnimationManager {
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        static Animation *pop();
+        static Animation *remove(unsigned int gameObjectID);
+        static void removeAll(unsigned int gameObjectID);
 
-        static void push(struct AnimationTimes *at, AnimationCallbacks *ac);
+        static void push(unsigned int gameObjectID, struct AnimationTimes *at, AnimationCallbacks *ac);
 
         static void fire(float delta);
 };

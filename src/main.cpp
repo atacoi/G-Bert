@@ -76,6 +76,7 @@ int main() {
         prevTime = currTime;
 
         game.fireAnimations(delta);
+        game.checkCollisions();
         game.render(window);
         glfwPollEvents();
 
