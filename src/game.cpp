@@ -6,6 +6,7 @@
 #include "g_bert.h"
 #include "resource_manager.h"
 #include "rectangular_prism.h"
+#include "snake.h"
 
 unsigned int STATIC_IDs = 0;
 
@@ -51,7 +52,7 @@ std::string &Game::getTitle() { return screenTitle; }
 
 GAME_STATES Game::getCurrState() { return currState; }
 
-bool Game::getKey(int key) { 
+bool Game::getKey(int key) const { 
     if(key < 0 || key >= MAX_KEYS) {
         return false;
     }
@@ -119,7 +120,7 @@ void Game::update() {
         GameObject *go = gameObject.second;
         Entity *e = nullptr;
         if((e = dynamic_cast<Entity*>(go))) {
-            e->update(keys);
+            e->update(keys, player);
         }
     }
 }
@@ -136,8 +137,30 @@ void Game::render(GLFWwindow *window) {
 
     std::map<GLuint, GameObject*>::iterator it;
 
+    std::vector<Platform*> platforms;
+    std::vector<Entity*> entitiesLeft;
     for (auto &gameObject : gameObjectMap) {
-        gameObject.second->render(screenWidth, screenHeight);
+        Entity *e;
+        Platform *p;
+        if((e = dynamic_cast<Entity*>(gameObject.second))) {
+            if(e->getRenderBehindPlatforms()) {
+                e->render(screenWidth, screenHeight);
+            } else {
+                entitiesLeft.push_back(e);
+            }
+        } else if((p = dynamic_cast<Platform*>(gameObject.second))) {
+            platforms.push_back(p);
+        } else {
+            std::cerr << "unrecognized" << std::endl;
+        }
+       //gameObject.second->render(screenWidth, screenHeight);
+    }
+    for (Platform *p : platforms) {
+        p->render(screenWidth, screenHeight);
+    }
+
+    for (Entity *e : entitiesLeft) {
+        e->render(screenWidth, screenHeight);
     }
 
     glfwSwapBuffers(window);
@@ -187,6 +210,7 @@ void Game::initializeShaders() {
 
 void Game::initializeTextures() {
     ResourceManager::createTexture("q_bert.png", "g-bert");
+    ResourceManager::createTexture("snake.png", "snake");
 }
 
 void Game::initializeBoard(glm::vec2 origin) {
@@ -203,7 +227,18 @@ void Game::initializeBoard(glm::vec2 origin) {
                         ResourceManager::getShader("sprite"), 
                         ResourceManager::getTexture("g-bert")
                     );
+
+    Snake *s = new Snake (o, 
+                        ResourceManager::getShader("sprite"), 
+                        ResourceManager::getTexture("snake")
+                    );
     addGameObject(player);
+    addGameObject(s);
+    Platform *bottomRight = startingPrism;
+    while(bottomRight && bottomRight->getSouthEast()) {
+        bottomRight = bottomRight->getSouthEast();
+    }
+    s->setCurrentPlatform(bottomRight);
     player->setCurrentPlatform(startingPrism);
 }
 

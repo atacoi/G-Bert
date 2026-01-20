@@ -52,7 +52,7 @@ class Game {
         int getScreenHeight();
         std::string &getTitle();
         GAME_STATES getCurrState();
-        bool getKey(int key);
+        bool getKey(int key) const;
         bool getProcessed(int key);
 
         /* ********************************************** */

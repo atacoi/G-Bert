@@ -5,17 +5,16 @@ GBert::GBert (glm::vec2 origin,
               Texture2D *texture, 
               int width, 
               int height,
-              float maxHeight,
-              float totalAirTime):
-              Entity::Entity(origin, shader, texture, width, height, maxHeight, totalAirTime)
+              float maxHeight):
+              Entity::Entity(origin, shader, texture, width, height, maxHeight)
 {
-    Shader *s = getShader();
-    if(s) {
-        s->use();
-        s->setUniform1i(GBERT_FRAME_INDICES::SOUTHWEST_STANDING, "frameIndex");
-        s->setUniform1i(GBERT_FRAME_INDICES::SIZE, "columnCount");
-    }
+    setCurrentFrame(GBERT_FRAME_INDICES::SOUTHWEST_STANDING);
+    setFrameCount(GBERT_FRAME_INDICES::SIZE);
 }
+
+/* ********************************************** */
+/*                  UTILITY                       */
+/* ********************************************** */
 
 void GBert::jump(GBert::DIRECTIONS dir) {
     int frameIndex = -1;
@@ -36,12 +35,37 @@ void GBert::jump(GBert::DIRECTIONS dir) {
             frameIndex = GBERT_FRAME_INDICES::SOUTHWEST_STANDING;
             break;
     }
-
-    Shader *s = getShader();
-    if(s) {
-        s->setUniform1i(frameIndex, "frameIndex");
-        s->setUniform1i(GBERT_FRAME_INDICES::SIZE, "columnCount");
-    }
-
+    setCurrentFrame(frameIndex);
     Entity::jump(dir);
+}
+
+/* ********************************************** */
+/*                 PROTECTED                      */
+/* ********************************************** */
+
+/* ********************************************** */
+/*                  UTILITY                       */
+/* ********************************************** */
+
+void GBert::jumpCleanupDelay() {
+    int frameIndex;
+    switch(currDirection) {
+        case Entity::DIRECTIONS::NORTHEAST:
+            frameIndex = GBert::GBERT_FRAME_INDICES::NORTHEAST_SITTING;
+            break;
+
+        case Entity::DIRECTIONS::NORTHWEST:
+            frameIndex = GBert::GBERT_FRAME_INDICES::NORTHWEST_SITTING;
+            break;
+
+        case Entity::DIRECTIONS::SOUTHEAST:
+            frameIndex = GBert::GBERT_FRAME_INDICES::SOUTHEAST_SITTING;
+            break;
+
+        case Entity::DIRECTIONS::SOUTHWEST:
+            frameIndex = GBert::GBERT_FRAME_INDICES::SOUTHWEST_SITTING;
+            break;
+    }
+    setCurrentFrame(frameIndex);
+    Entity::jumpCleanupDelay();
 }

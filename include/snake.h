@@ -6,13 +6,13 @@
 
 #include <glm/glm.hpp>
 
-class GBert : public Entity {
+class Snake : public Entity {
     public:
         /* ********************************************** */
         /*                    ENUMS                       */
         /* ********************************************** */
         
-        enum GBERT_FRAME_INDICES {
+        enum SNAKE_FRAME_INDICES {
             NORTHEAST_SITTING,
             NORTHEAST_STANDING,
             NORTHWEST_SITTING,
@@ -28,18 +28,20 @@ class GBert : public Entity {
         /*                CONSTRUCTORS                    */
         /* ********************************************** */
 
-        GBert (glm::vec2 origin   = glm::vec2(0.0f, 0.0f),
+        Snake (glm::vec2 origin   = glm::vec2(0.0f, 0.0f),
                Shader *shader     = nullptr, 
                Texture2D *texture = nullptr, 
                int width          = 50, 
-               int height         = 55,
+               int height         = 100,
                float maxHeight    = 40.0f);
 
         /* ********************************************** */
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        void jump(GBert::DIRECTIONS dir) override;
+        void jump(Snake::DIRECTIONS dir) override;
+
+        void update(const bool *keys, const Entity *player) override;
 
     protected:
         /* ********************************************** */

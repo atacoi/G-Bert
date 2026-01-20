@@ -23,8 +23,7 @@ class Entity : public GameObject {
                 Texture2D *texture = nullptr, 
                 int width          = 10, 
                 int height         = 10,
-                float maxHeight    = 65.0f,
-                float totalAirTime = 0.44f);
+                float maxHeight    = 65.0f);
 
         /* ********************************************** */
         /*                  GETTERS                       */
@@ -34,9 +33,11 @@ class Entity : public GameObject {
 
         bool isAirBorne();
         float getMaxJumpHeight();
-        float getTotalAirTime();
 
         int getFrameCount();
+        int getCurrentFrame();
+
+        bool getRenderBehindPlatforms();
 
         /* ********************************************** */
         /*                  SETTERS                       */
@@ -46,17 +47,34 @@ class Entity : public GameObject {
 
         void setIsAirBorne(bool isAirBorne);
         void setMaxJumpHeight(float maxJumpHeight);
-        void setCurrentAirTime(float totalAirTime);
 
         void setFrameCount(int frameCount);
+        void setCurrentFrame(int frame);
+
+        void setRenderBehindPlatforms(bool rbp);
 
         /* ********************************************** */
         /*                  UTILITY                       */
         /* ********************************************** */
 
-        virtual void update(const bool *keys);
+        virtual void update(const bool *keys, const Entity *player);
 
         virtual void jump(DIRECTIONS dir); 
+
+        void render(int screenWidth, int screenHeight) override; 
+
+    protected:
+        Entity::DIRECTIONS currDirection;
+
+        /* ********************************************** */
+        /*                  UTILITY                       */
+        /* ********************************************** */
+
+        virtual void initJump(DIRECTIONS dir);
+
+        virtual void jumpRunning(float delta);
+        virtual void jumpCleanupDelay();
+        virtual void jumpCleanup();
 
     private:
         Platform *currPlatform; // object the entity is standing on
@@ -64,23 +82,15 @@ class Entity : public GameObject {
 
         bool airBorne;
         float maxJumpHeight; 
-        float totalAirTime;
 
         int frameCount; // number of animation frames
+        int currFrame;
 
         glm::vec2 startPos; // before the jump
         glm::vec2 peakPos;  // the highest spot
         glm::vec2 endPos;   // after the jump
 
-        /* ********************************************** */
-        /*                  UTILITY                       */
-        /* ********************************************** */
-
-        void initJump(DIRECTIONS dir);
-
-        void jumpRunning(float delta);
-        void jumpCleanupDelay();
-        void jumpCleanup();
-
         bool playerHasMoved(const bool *keys);
+
+        bool renderBehindPlatforms; // if true, the entity is rendered behind the platforms 
 };

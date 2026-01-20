@@ -78,7 +78,7 @@ void GameObject::setHeight(int height) {
 /* ********************************************** */
 
 void GameObject::render(int screenWidth, int screenHeight) {
-    if(!texture) {
+    if(texture) {
         texture->use();
     }
 
