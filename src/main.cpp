@@ -3,8 +3,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "game.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
+#include "game.h"
+#include "shader.h"
+#include "resource_manager.h"
+#include "cube.h"
+#include "g_bert.h"
+#include "texture2d.h"
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height); 
 void windowCloseCallback(GLFWwindow *window);
 
@@ -23,7 +33,7 @@ int main() {
 
     GLFWwindow *window = glfwCreateWindow(game.getScreenWidth(), 
                                           game.getScreenHeight(), 
-                                          game.getTitle(), 
+                                          game.getTitle().c_str(), 
                                           NULL, 
                                           NULL);
 
@@ -41,21 +51,61 @@ int main() {
         return -1;
     }
 
+    glViewport(0, 0, game.getScreenWidth(), game.getScreenHeight());
+
+    glfwSetKeyCallback(window, keyCallback);
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
 
-    glClearColor(0.0f, 0.22f, 0.55f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
+    game.init();
 
-    while(!glfwWindowShouldClose(window)) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_MULTISAMPLE);
+
+    const double SPF = 1.0 / 60.0;
+
+    double prevTime = glfwGetTime();
+
+    while (!glfwWindowShouldClose(window)) {
+        double currTime = glfwGetTime();
+
+        game.update();
+
+        float delta = (float) currTime - (float) prevTime;
+        prevTime = currTime;
+
+        game.fireAnimations(delta);
+        game.checkCollisions();
+        game.render(window);
         glfwPollEvents();
+
+        double frameTime = glfwGetTime() - currTime;
+        if (frameTime < SPF) {
+            glfwWaitEventsTimeout(SPF - frameTime);
+        }
     }
 
+    ResourceManager::cleanup();
+    
     glfwDestroyWindow(window);
     glfwTerminate();
 
     return 0;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    if (action == GLFW_PRESS) {
+        game.setKey(key, true);
+    } else if (action == GLFW_RELEASE) {
+        game.setKey(key, false);
+        game.setProcessed(key, false);
+    }
 }
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height) {
